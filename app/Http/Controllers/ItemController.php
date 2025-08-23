@@ -14,15 +14,23 @@ class ItemController extends Controller
 {
     public function modal(Item $item)
     {
-        $item->load('modifierGroups.modifiers', 'ratings.user');
+        // Load modifier groups and modifiers with proper eager loading
+        $item->load([
+            'modifierGroups' => function($query) {
+                $query->orderBy('sort_index')
+                      ->with(['modifiers' => function($subQuery) {
+                          $subQuery->where('available', true)
+                                   ->orderBy('sort_index');
+                      }]);
+            }
+        ]);
         
-        // Check if current user can rate this item
-        $canRate = false;
-        if (auth()->check()) {
-            $canRate = auth()->user()->canRateItem($item->id);
+        // Ensure the item is available for ordering
+        if (!$item->visible || !$item->available) {
+            abort(404, 'Item not available');
         }
 
-        return view('modals.item-details', compact('item', 'canRate'));
+        return view('modals.item-modal', compact('item'));
     }
 
     public function store(Request $request, Category $category)

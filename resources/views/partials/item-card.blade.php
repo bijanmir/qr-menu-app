@@ -1,6 +1,8 @@
 {{-- resources/views/partials/item-card.blade.php --}}
-<div class="card hover:shadow-soft-lg transition-shadow cursor-pointer" 
-     onclick="window.itemModal.open({{ $item->id }})">
+<div class="card hover:shadow-lg transition-shadow cursor-pointer" 
+     hx-get="{{ route('customer.item.modal', $item->id) }}"
+     hx-target="body"
+     hx-swap="beforeend">
     <div class="flex">
         @if($item->image)
         <div class="w-24 h-24 flex-shrink-0">

@@ -98,6 +98,12 @@ class CartController extends Controller
         return response()->json(['checkout_url' => $checkoutSession->url]);
     }
 
+    public function count()
+    {
+        $count = $this->cartService->getItemCount();
+        return response()->json(['count' => $count]);
+    }
+
     private function renderCartDrawer()
     {
         $cart = $this->cartService->getCart();

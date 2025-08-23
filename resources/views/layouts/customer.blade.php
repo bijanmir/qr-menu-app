@@ -1,5 +1,5 @@
 {{-- resources/views/layouts/customer.blade.php --}}
-@extends('layouts.app')
+@extends('layouts.customer-base')
 
 @section('content')
 <div class="min-h-screen bg-white">

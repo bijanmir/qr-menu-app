@@ -91,4 +91,16 @@ class Item extends Model
             get: fn () => '$' . number_format($this->price, 2)
         );
     }
+
+    // Alias for formatted_price (snake_case access)
+    public function getFormattedPriceAttribute()
+    {
+        return '$' . number_format($this->price, 2);
+    }
+
+    // Check if item is 86'd (unavailable)
+    public function getIs86edAttribute()
+    {
+        return !$this->available;
+    }
 }

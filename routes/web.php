@@ -40,16 +40,19 @@ Route::get('/r/{restaurant:slug}/m/{menu}', [CustomerController::class, 'menu'])
 // Customer API routes (HTMX)
 Route::prefix('customer')->name('customer.')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
     Route::patch('/cart/line/{index}', [CartController::class, 'updateLine'])->name('cart.update');
     Route::delete('/cart/line/{index}', [CartController::class, 'removeLine'])->name('cart.remove');
     Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
     Route::get('/items/{item}/modal', [ItemController::class, 'modal'])->name('item.modal');
     Route::post('/ratings', [RatingController::class, 'store'])->name('rating.store');
+    Route::get('/order/{order}/success', [CustomerController::class, 'orderSuccess'])->name('customer.order.success');
+
 });
 
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+
     // Dashboard routes
     Route::get('/dashboard', function () {
         return redirect()->route('owner.dashboard');
@@ -58,52 +61,52 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Owner/Manager routes
     Route::prefix('owner')->name('owner.')->middleware(['role:owner|manager|admin'])->group(function () {
         Route::get('/', [OwnerController::class, 'dashboard'])->name('dashboard');
-        
+
         // Restaurant management
         Route::resource('restaurants', RestaurantController::class);
         Route::post('/restaurants/{restaurant}/tables', [RestaurantController::class, 'createTable'])->name('restaurants.tables.store');
         Route::delete('/restaurants/{restaurant}/tables/{table}', [RestaurantController::class, 'destroyTable'])->name('restaurants.tables.destroy');
-        
+
         // Menu management
         Route::resource('menus', MenuController::class);
         Route::post('/menus/{menu}/duplicate', [MenuController::class, 'duplicate'])->name('menus.duplicate');
         Route::post('/menus/{menu}/linked-copy', [MenuController::class, 'createLinkedCopy'])->name('menus.linked-copy');
         Route::post('/menus/{menu}/publish', [MenuController::class, 'publish'])->name('menus.publish');
         Route::patch('/menus/{menu}/schedule', [MenuController::class, 'schedule'])->name('menus.schedule');
-        
+
         // Category management (HTMX)
         Route::post('/menus/{menu}/categories', [MenuController::class, 'createCategory'])->name('menus.categories.store');
         Route::patch('/categories/{category}', [MenuController::class, 'updateCategory'])->name('categories.update');
         Route::delete('/categories/{category}', [MenuController::class, 'destroyCategory'])->name('categories.destroy');
         Route::patch('/categories/{category}/reorder', [MenuController::class, 'reorderCategory'])->name('categories.reorder');
-        
+
         // Item management (HTMX)
         Route::post('/categories/{category}/items', [ItemController::class, 'store'])->name('items.store');
         Route::patch('/items/{item}', [ItemController::class, 'update'])->name('items.update');
         Route::delete('/items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
         Route::patch('/items/{item}/reorder', [ItemController::class, 'reorder'])->name('items.reorder');
         Route::post('/items/{item}/86', [ItemController::class, 'toggle86'])->name('items.86');
-        
+
         // Modifier management
         Route::post('/items/{item}/modifier-groups', [ItemController::class, 'createModifierGroup'])->name('items.modifier-groups.store');
         Route::patch('/modifier-groups/{modifierGroup}', [ItemController::class, 'updateModifierGroup'])->name('modifier-groups.update');
         Route::delete('/modifier-groups/{modifierGroup}', [ItemController::class, 'destroyModifierGroup'])->name('modifier-groups.destroy');
-        
+
         Route::post('/modifier-groups/{modifierGroup}/modifiers', [ItemController::class, 'createModifier'])->name('modifiers.store');
         Route::patch('/modifiers/{modifier}', [ItemController::class, 'updateModifier'])->name('modifiers.update');
         Route::delete('/modifiers/{modifier}', [ItemController::class, 'destroyModifier'])->name('modifiers.destroy');
-        
+
         // Order management
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::post('/orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
-        
+
         // QR Code management
         Route::get('/restaurants/{restaurant}/qr-codes', [QrCodeController::class, 'index'])->name('restaurants.qr-codes.index');
         Route::post('/restaurants/{restaurant}/qr-codes/generate', [QrCodeController::class, 'generate'])->name('restaurants.qr-codes.generate');
         Route::get('/restaurants/{restaurant}/qr-codes/{qrCode}/download', [QrCodeController::class, 'download'])->name('restaurants.qr-codes.download');
-        
+
         // Analytics & Reports
         Route::get('/analytics', [OwnerController::class, 'analytics'])->name('analytics');
         Route::get('/reports', [OwnerController::class, 'reports'])->name('reports');
@@ -137,4 +140,6 @@ Route::prefix('api/v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/orders/{order}', [\App\Http\Controllers\Api\OrderController::class, 'show']);
 });
 
-require __DIR__.'/auth.php';
+
+
+require __DIR__ . '/auth.php';
