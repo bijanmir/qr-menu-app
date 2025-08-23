@@ -11,7 +11,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Add global middleware to web group
+        $middleware->web([
+            \App\Http\Middleware\HandleSubdomainRouting::class,
+            \App\Http\Middleware\EnsureTenantScope::class,
+        ]);
+        
+        // Register route-specific middleware
+        $middleware->alias([
+            'tenant.scope' => \App\Http\Middleware\EnsureTenantScope::class,
+            'subdomain' => \App\Http\Middleware\HandleSubdomainRouting::class,
+            'table.access' => \App\Http\Middleware\ValidateTableAccess::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
