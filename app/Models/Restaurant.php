@@ -69,8 +69,21 @@ class Restaurant extends Model
     {
         return $this->menus()
             ->where('status', 'published')
-            ->whereRaw('JSON_EXTRACT(schedule, "$.active") IS NULL OR JSON_EXTRACT(schedule, "$.active") = true')
-            ->get();
+            ->get()
+            ->filter(function ($menu) {
+                // If no schedule, consider it active
+                if (!$menu->schedule) {
+                    return true;
+                }
+                
+                // If schedule doesn't have 'active' key, consider it active
+                if (!array_key_exists('active', $menu->schedule)) {
+                    return true;
+                }
+                
+                // Return the actual 'active' value
+                return $menu->schedule['active'] === true;
+            });
     }
 
     public function getRouteKeyName(): string

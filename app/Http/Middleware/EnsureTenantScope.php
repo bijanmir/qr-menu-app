@@ -16,18 +16,8 @@ class EnsureTenantScope
 
         $user = Auth::user();
         
-        // Skip for admin users (with error handling)
-        try {
-            if ($user->hasRole('admin')) {
-                return $next($request);
-            }
-        } catch (\Exception $e) {
-            // If role checking fails, log the error and continue
-            \Log::warning('Role checking failed in EnsureTenantScope middleware', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
-            ]);
-        }
+        // Role checking completely removed for now
+        // Will re-add once Spatie Permission is properly installed
 
         // Add tenant scope to query builder
         if ($user->tenant_id) {
@@ -42,19 +32,25 @@ class EnsureTenantScope
 
     private function addTenantScopes(int $tenantId): void
     {
-        // Add global scopes for multi-tenant models
-        \App\Models\Restaurant::addGlobalScope('tenant', function ($builder) use ($tenantId) {
-            $builder->where('tenant_id', $tenantId);
-        });
-
-        \App\Models\Menu::addGlobalScope('tenant', function ($builder) use ($tenantId) {
-            $builder->where('tenant_id', $tenantId);
-        });
-
-        \App\Models\User::addGlobalScope('tenant', function ($builder) use ($tenantId) {
-            if (!app()->runningInConsole()) {
+        // Only add scopes if models exist
+        if (class_exists(\App\Models\Restaurant::class)) {
+            \App\Models\Restaurant::addGlobalScope('tenant', function ($builder) use ($tenantId) {
                 $builder->where('tenant_id', $tenantId);
-            }
-        });
+            });
+        }
+
+        if (class_exists(\App\Models\Menu::class)) {
+            \App\Models\Menu::addGlobalScope('tenant', function ($builder) use ($tenantId) {
+                $builder->where('tenant_id', $tenantId);
+            });
+        }
+
+        if (class_exists(\App\Models\User::class)) {
+            \App\Models\User::addGlobalScope('tenant', function ($builder) use ($tenantId) {
+                if (!app()->runningInConsole()) {
+                    $builder->where('tenant_id', $tenantId);
+                }
+            });
+        }
     }
 }

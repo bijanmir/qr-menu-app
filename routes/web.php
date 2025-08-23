@@ -56,7 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Owner/Manager routes
-    Route::prefix('owner')->name('owner.')->middleware(['role:owner|manager'])->group(function () {
+    Route::prefix('owner')->name('owner.')->middleware(['role:owner|manager|admin'])->group(function () {
         Route::get('/', [OwnerController::class, 'dashboard'])->name('dashboard');
         
         // Restaurant management
