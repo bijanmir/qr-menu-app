@@ -28,7 +28,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main>
+            <main class="md:p-4">
                 @yield('content')
             </main>
         </div>

@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between p-4 border-b border-neutral-200">
         <h2 class="text-lg font-semibold text-neutral-900">Your Order</h2>
         <button 
-            onclick="document.getElementById('cart-drawer').classList.add('translate-x-full')"
+            onclick="closeCartDrawer()"
             class="p-2 rounded-lg hover:bg-neutral-100"
         >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

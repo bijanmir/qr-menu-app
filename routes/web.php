@@ -12,6 +12,7 @@ use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\MenuSharingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,6 +42,7 @@ Route::get('/r/{restaurant:slug}/m/{menu}', [CustomerController::class, 'menu'])
 Route::prefix('customer')->name('customer.')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+    Route::get('/cart/drawer', [CartController::class, 'drawer'])->name('cart.drawer');
     Route::patch('/cart/line/{index}', [CartController::class, 'updateLine'])->name('cart.update');
     Route::delete('/cart/line/{index}', [CartController::class, 'removeLine'])->name('cart.remove');
     Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
@@ -106,6 +108,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/restaurants/{restaurant}/qr-codes', [QrCodeController::class, 'index'])->name('restaurants.qr-codes.index');
         Route::post('/restaurants/{restaurant}/qr-codes/generate', [QrCodeController::class, 'generate'])->name('restaurants.qr-codes.generate');
         Route::get('/restaurants/{restaurant}/qr-codes/{qrCode}/download', [QrCodeController::class, 'download'])->name('restaurants.qr-codes.download');
+
+        // Menu Sharing
+        Route::prefix('restaurants/{restaurant}/sharing')->name('sharing.')->group(function () {
+            Route::get('/browse', [MenuSharingController::class, 'browse'])->name('browse');
+            Route::get('/item/{item}', [MenuSharingController::class, 'show'])->name('item');
+            Route::post('/duplicate', [MenuSharingController::class, 'duplicate'])->name('duplicate');
+            Route::post('/link', [MenuSharingController::class, 'link'])->name('link');
+            Route::post('/request', [MenuSharingController::class, 'createRequest'])->name('request');
+            Route::post('/items/{item}/sync', [MenuSharingController::class, 'sync'])->name('sync');
+            Route::post('/items/{item}/unlink', [MenuSharingController::class, 'unlink'])->name('unlink');
+            Route::get('/requests', [MenuSharingController::class, 'requests'])->name('requests');
+            Route::post('/requests/{itemSharingRequest}/approve', [MenuSharingController::class, 'approveRequest'])->name('requests.approve');
+            Route::post('/requests/{itemSharingRequest}/reject', [MenuSharingController::class, 'rejectRequest'])->name('requests.reject');
+            Route::get('/manage', [MenuSharingController::class, 'manage'])->name('manage');
+        });
 
         // Analytics & Reports
         Route::get('/analytics', [OwnerController::class, 'analytics'])->name('analytics');

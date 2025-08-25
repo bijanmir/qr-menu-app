@@ -1,12 +1,12 @@
 {{-- resources/views/modals/item-modal.blade.php --}}
 <!-- Item Modal (returned as HTMX response) -->
 <div id="item-modal" class="fixed inset-0 z-50 overflow-y-auto" style="display: block;">
-    <div class="flex min-h-screen items-center justify-center p-4">
+    <div class="flex min-h-screen items-center justify-center p-2 sm:p-4">
         <!-- Backdrop -->
         <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeModal()"></div>
         
         <!-- Modal Content -->
-        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-screen overflow-y-auto">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-screen overflow-y-auto mx-2 sm:mx-0">
             <!-- Close Button -->
             <button onclick="closeModal()" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,10 +48,16 @@
                 <form hx-post="{{ route('customer.cart.add') }}" 
                       hx-target="#cart-drawer" 
                       hx-swap="innerHTML"
-                      hx-on::after-request="closeModal(); updateCartCount();"
+                      hx-on::after-request="handleCartResponse(event)"
+                      hx-on::before-request="showLoading()"
                       class="space-y-6">
                     @csrf
                     <input type="hidden" name="item_id" value="{{ $item->id }}">
+                    
+                    <!-- Error Display -->
+                    <div id="cart-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        <span class="error-message"></span>
+                    </div>
 
                     <!-- Modifier Groups -->
                     @if($item->modifierGroups && $item->modifierGroups->count() > 0)
@@ -65,7 +71,7 @@
                                 </h3>
 
                                 <div class="space-y-2">
-                                    @if($group->selection_type === 'single')
+                                    @if($group->max_selection === 1)
                                         <!-- Radio buttons for single selection -->
                                         @foreach($group->modifiers as $modifier)
                                             <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
@@ -73,12 +79,14 @@
                                                     <input type="radio" 
                                                            name="modifiers[{{ $group->id }}]" 
                                                            value="{{ $modifier->id }}"
-                                                           class="text-blue-600 focus:ring-blue-500"
+                                                           class="text-primary-600 focus:ring-primary-500"
                                                            @if($group->required && $loop->first) required @endif>
                                                     <span class="ml-3 text-gray-900">{{ $modifier->name }}</span>
                                                 </div>
                                                 @if($modifier->price_adjustment > 0)
                                                     <span class="text-gray-600">+${{ number_format($modifier->price_adjustment, 2) }}</span>
+                                                @elseif($modifier->price_adjustment < 0)
+                                                    <span class="text-gray-600">${{ number_format($modifier->price_adjustment, 2) }}</span>
                                                 @endif
                                             </label>
                                         @endforeach
@@ -90,11 +98,17 @@
                                                     <input type="checkbox" 
                                                            name="modifiers[{{ $group->id }}][]" 
                                                            value="{{ $modifier->id }}"
-                                                           class="text-blue-600 focus:ring-blue-500">
+                                                           class="text-primary-600 focus:ring-primary-500"
+                                                           @if($group->max_selection && $group->max_selection > 1)
+                                                               data-max-selection="{{ $group->max_selection }}"
+                                                               onchange="enforceMaxSelection(this)"
+                                                           @endif>
                                                     <span class="ml-3 text-gray-900">{{ $modifier->name }}</span>
                                                 </div>
                                                 @if($modifier->price_adjustment > 0)
                                                     <span class="text-gray-600">+${{ number_format($modifier->price_adjustment, 2) }}</span>
+                                                @elseif($modifier->price_adjustment < 0)
+                                                    <span class="text-gray-600">${{ number_format($modifier->price_adjustment, 2) }}</span>
                                                 @endif
                                             </label>
                                         @endforeach
@@ -181,6 +195,142 @@ function updateCartCount() {
             }
         })
         .catch(console.error);
+}
+
+// Enforce max selection for modifier groups
+function enforceMaxSelection(checkbox) {
+    const maxSelection = parseInt(checkbox.dataset.maxSelection);
+    if (!maxSelection || maxSelection <= 1) return;
+    
+    const groupName = checkbox.name;
+    const checkboxes = document.querySelectorAll(`input[name="${groupName}"]`);
+    const checkedBoxes = Array.from(checkboxes).filter(cb => cb.checked);
+    
+    if (checkedBoxes.length > maxSelection) {
+        checkbox.checked = false;
+        alert(`You can only select up to ${maxSelection} options for this category.`);
+    }
+}
+
+// Form validation before submission
+function validateForm() {
+    const form = document.querySelector('#item-modal form');
+    const requiredGroups = form.querySelectorAll('[data-required="true"]');
+    
+    for (let group of requiredGroups) {
+        const inputs = group.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+        const hasSelection = Array.from(inputs).some(input => input.checked);
+        
+        if (!hasSelection) {
+            const groupName = group.querySelector('h3').textContent.trim();
+            alert(`Please make a selection for ${groupName}`);
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Handle cart response (success or error)
+function handleCartResponse(event) {
+    const response = event.detail.xhr;
+    
+    if (response.status >= 200 && response.status < 300) {
+        // Success - close modal and update cart
+        hideError();
+        closeModal();
+        updateCartCount();
+        showCartDrawer();
+        
+        // Show success message based on quantity
+        const quantity = parseInt(document.getElementById('quantity').value) || 1;
+        const itemName = '{{ $item->name }}';
+        const message = quantity > 1 
+            ? `${quantity} ${itemName}s added to cart!` 
+            : `${itemName} added to cart!`;
+        showSuccessMessage(message);
+    } else {
+        // Error - show error message
+        try {
+            const errorData = JSON.parse(response.responseText);
+            showError(errorData.message || errorData.error || 'Failed to add item to cart');
+        } catch (e) {
+            showError('Failed to add item to cart. Please try again.');
+        }
+    }
+    hideLoading();
+}
+
+// Show loading state
+function showLoading() {
+    const button = document.querySelector('#item-modal button[type="submit"]');
+    if (button && !button.disabled) {
+        button.disabled = true;
+        button.innerHTML = '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Adding...</span>';
+    }
+}
+
+// Hide loading state
+function hideLoading() {
+    const button = document.querySelector('#item-modal button[type="submit"]');
+    if (button) {
+        button.disabled = false;
+        button.innerHTML = 'Add to Cart';
+    }
+}
+
+// Show error message
+function showError(message) {
+    const errorDiv = document.getElementById('cart-error');
+    const errorMessage = errorDiv.querySelector('.error-message');
+    if (errorDiv && errorMessage) {
+        errorMessage.textContent = message;
+        errorDiv.classList.remove('hidden');
+    }
+}
+
+// Hide error message
+function hideError() {
+    const errorDiv = document.getElementById('cart-error');
+    if (errorDiv) {
+        errorDiv.classList.add('hidden');
+    }
+}
+
+// Show cart drawer
+function showCartDrawer() {
+    const cartDrawer = document.getElementById('cart-drawer');
+    const overlay = document.getElementById('cart-overlay');
+    if (cartDrawer) {
+        cartDrawer.classList.remove('translate-x-full');
+    }
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
+}
+
+// Show success message
+function showSuccessMessage(message) {
+    // Create a temporary success notification
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Animate out and remove
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
 }
 
 // Prevent body scrolling when modal is open

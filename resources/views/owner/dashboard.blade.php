@@ -285,7 +285,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                 <div class="space-y-3">
-                    <button class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl group">
+                    <button onclick="showAddMenuItemModal()" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl group">
                         <div class="flex items-center space-x-3">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -297,7 +297,7 @@
                         </svg>
                     </button>
                     
-                    <button class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl group">
+                    <a href="{{ route('owner.orders.index') }}" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl group">
                         <div class="flex items-center space-x-3">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -310,9 +310,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </div>
-                    </button>
+                    </a>
                     
-                    <button class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl group">
+                    <a href="{{ route('owner.analytics') }}" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl group">
                         <div class="flex items-center space-x-3">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -322,7 +322,7 @@
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -337,18 +337,18 @@
                         <h3 class="text-lg font-semibold text-gray-900">Your Restaurants</h3>
                         <p class="text-sm text-gray-600">Manage all your locations</p>
                     </div>
-                    <button class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl">
+                    <a href="{{ route('owner.restaurants.create') }}" class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
                         <span>Add Location</span>
-                    </button>
+                    </a>
                 </div>
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($restaurants as $restaurant)
-                        <div class="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 border border-gray-200 hover:border-blue-200 cursor-pointer">
+                        <a href="{{ route('owner.restaurants.show', $restaurant) }}" class="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 border border-gray-200 hover:border-blue-200 cursor-pointer block">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="p-3 bg-white rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
                                     <svg class="w-6 h-6 text-gray-700 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -357,7 +357,7 @@
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                    <span class="text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">Active</span>
+                                    <span class="text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">{{ $restaurant->active ? 'Active' : 'Inactive' }}</span>
                                 </div>
                             </div>
                             <div>
@@ -373,7 +373,7 @@
                                 </div>
                             </div>
                             <div class="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 rounded-xl transition-all duration-300"></div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             </div>
@@ -389,7 +389,7 @@
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Welcome to Your QR Menu Dashboard!</h3>
                 <p class="text-gray-600 mb-6">Ready to revolutionize your restaurant experience? Let's get your first location set up with our cutting-edge QR menu system.</p>
-                <button class="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <a href="{{ route('owner.restaurants.create') }}" class="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
@@ -397,7 +397,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
-                </button>
+                </a>
             </div>
         </div>
     @endif
@@ -599,6 +599,38 @@ function refreshDashboard() {
     setTimeout(() => {
         button.innerHTML = originalHTML;
     }, 1000);
+}
+
+function showAddMenuItemModal() {
+    // Check if user has restaurants and menus first
+    @if(isset($restaurants) && $restaurants->count() > 0)
+        // Check if any restaurant has menus
+        @php
+            $hasMenus = false;
+            foreach($restaurants as $restaurant) {
+                if($restaurant->menus && $restaurant->menus->count() > 0) {
+                    $hasMenus = true;
+                    break;
+                }
+            }
+        @endphp
+        
+        @if($hasMenus)
+            // Find the first restaurant with menus and redirect to its menu editor
+            @foreach($restaurants as $restaurant)
+                @if($restaurant->menus && $restaurant->menus->count() > 0)
+                    window.location.href = '{{ route('owner.menus.show', ['menu' => '__MENU_ID__']) }}'.replace('__MENU_ID__', {{ $restaurant->menus->first()->id }});
+                    return;
+                @endif
+            @endforeach
+        @else
+            alert('Please create a menu first before adding items. You can create a menu from your restaurant management page.');
+            window.location.href = '{{ route('owner.restaurants.index') }}';
+        @endif
+    @else
+        alert('Please create a restaurant and menu first before adding menu items.');
+        window.location.href = '{{ route('owner.restaurants.create') }}';
+    @endif
 }
 </script>
 @endpush

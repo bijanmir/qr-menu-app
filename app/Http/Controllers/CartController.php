@@ -42,9 +42,11 @@ class CartController extends Controller
         );
 
         if (request()->headers->get('HX-Request')) {
+            // For HTMX requests (like from the modal), return the cart drawer HTML
             return $this->renderCartDrawer();
         }
 
+        // For regular AJAX requests (like from the quick add button), return JSON
         return response()->json(['success' => true, 'cart_item' => $cartItem]);
     }
 
@@ -102,6 +104,11 @@ class CartController extends Controller
     {
         $count = $this->cartService->getItemCount();
         return response()->json(['count' => $count]);
+    }
+
+    public function drawer()
+    {
+        return $this->renderCartDrawer();
     }
 
     private function renderCartDrawer()

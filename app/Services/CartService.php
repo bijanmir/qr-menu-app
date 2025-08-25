@@ -57,22 +57,31 @@ class CartService
             }
         }
 
-        // Create cart item
-        $cartItem = [
-            'id' => uniqid(),
-            'item_id' => $item->id,
-            'name' => $item->name,
-            'price' => $itemPrice,
-            'base_price' => $item->price,
-            'quantity' => $quantity,
-            'modifiers' => $selectedModifiers,
-            'notes' => $notes,
-            'image' => $item->image,
-        ];
-
-        $cart['items'][] = $cartItem;
-        $cart = $this->calculateTotals($cart);
+        // Check if identical item already exists in cart
+        $existingItemIndex = $this->findExistingItem($cart['items'], $item->id, $selectedModifiers, $notes);
         
+        if ($existingItemIndex !== null) {
+            // Item exists, just increase quantity
+            $cart['items'][$existingItemIndex]['quantity'] += $quantity;
+            $cartItem = $cart['items'][$existingItemIndex];
+        } else {
+            // Create new cart item
+            $cartItem = [
+                'id' => uniqid(),
+                'item_id' => $item->id,
+                'name' => $item->name,
+                'price' => $itemPrice,
+                'base_price' => $item->price,
+                'quantity' => $quantity,
+                'modifiers' => $selectedModifiers,
+                'notes' => $notes,
+                'image' => $item->image,
+            ];
+            
+            $cart['items'][] = $cartItem;
+        }
+        
+        $cart = $this->calculateTotals($cart);
         Session::put(self::CART_SESSION_KEY, $cart);
         
         return $cartItem;
@@ -115,6 +124,49 @@ class CartService
     {
         $cart = $this->getCart();
         return collect($cart['items'])->sum('quantity');
+    }
+
+    private function findExistingItem(array $cartItems, int $itemId, array $modifiers, ?string $notes): ?int
+    {
+        foreach ($cartItems as $index => $cartItem) {
+            if ($cartItem['item_id'] === $itemId && 
+                $this->modifiersMatch($cartItem['modifiers'], $modifiers) &&
+                $cartItem['notes'] === $notes) {
+                return $index;
+            }
+        }
+        
+        return null;
+    }
+    
+    private function modifiersMatch(array $existingModifiers, array $newModifiers): bool
+    {
+        // Convert both to comparable format and sort
+        $existing = json_encode($this->normalizeModifiers($existingModifiers));
+        $new = json_encode($this->normalizeModifiers($newModifiers));
+        
+        return $existing === $new;
+    }
+    
+    private function normalizeModifiers(array $modifiers): array
+    {
+        $normalized = [];
+        
+        foreach ($modifiers as $groupId => $group) {
+            if (!empty($group['modifiers'])) {
+                $groupModifiers = $group['modifiers'];
+                // Sort by modifier ID for consistent comparison
+                usort($groupModifiers, function($a, $b) {
+                    return $a['id'] <=> $b['id'];
+                });
+                $normalized[$groupId] = $groupModifiers;
+            }
+        }
+        
+        // Sort by group ID for consistent comparison
+        ksort($normalized);
+        
+        return $normalized;
     }
 
     private function calculateTotals(array $cart): array
