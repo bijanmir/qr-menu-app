@@ -1,0 +1,15 @@
+/* Customer menu pages styles */
+@layer components {
+    .category-nav {
+        @apply sticky top-0 z-20 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60;
+    }
+
+    .category-button {
+        @apply chip;
+    }
+
+    .category-button.active {
+        @apply bg-primary-100 text-primary-800;
+    }
+}
+

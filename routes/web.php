@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
 // Customer routes (QR code access)
 Route::domain('{subdomain}.qrmenu.app')->group(function () {

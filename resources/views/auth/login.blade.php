@@ -1,4 +1,12 @@
+<!-- resources/views/auth/login.blade.php   -->
+
 <x-guest-layout>
+    <!-- Premium Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome Back</h1>
+        <p class="text-gray-600 dark:text-gray-400">Sign in to your account</p>
+    </div>
+    
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -15,12 +23,7 @@
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
+            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
@@ -32,7 +35,7 @@
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <div class="auth-actions mt-4">
             @if (Route::has('password.request'))
                 <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                     {{ __('Forgot your password?') }}
@@ -44,4 +47,14 @@
             </x-primary-button>
         </div>
     </form>
+
+    <!-- Register Link -->
+    <div class="text-center mt-6">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Don't have an account?</p>
+        @if (Route::has('register'))
+            <a href="{{ route('register') }}" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                Create your account
+            </a>
+        @endif
+    </div>
 </x-guest-layout>

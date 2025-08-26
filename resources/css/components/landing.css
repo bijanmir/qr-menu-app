@@ -1,0 +1,11 @@
+/* Landing page specific styles */
+@layer components {
+    .landing-hero {
+        @apply relative overflow-hidden bg-gradient-to-b from-primary-50 to-white;
+    }
+
+    .landing-section {
+        @apply py-16 md:py-24;
+    }
+}
+
